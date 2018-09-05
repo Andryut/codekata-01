@@ -1,9 +1,27 @@
 class Product
 
-  attr_reader :price
+  attr_reader :price, :unit_type
 
-  def initialize price
+  def initialize price, unit_type
     @price = price
+    @unit_type = unit_type
+  end
+
+
+  def self.by_unit price
+    Product.new price, :unit
+  end
+
+  def self.by_kg price
+    Product.new price, :kg
+  end
+
+  def price_for quantity
+    if @unit_type == :kg
+      @price * quantity / 1000
+    else
+      @price * quantity
+    end
   end
 
 end
@@ -16,7 +34,7 @@ class ProductWithQuantity
   end
 
   def total
-    @product.price * @quantity
+    @product.price_for(@quantity)
   end
 
 end
