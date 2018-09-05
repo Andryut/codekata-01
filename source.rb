@@ -1,20 +1,21 @@
 class Product
 
-  attr_reader :price, :unit_type
+  attr_reader :price, :unit_type, :cost
   attr_accessor :offer
 
-  def initialize price, unit_type
+  def initialize price, unit_type, cost
     @price = price
     @unit_type = unit_type
+    @cost = cost
   end
 
 
-  def self.by_unit price
-    Product.new price, :unit
+  def self.by_unit price, cost=nil
+    Product.new price, :unit, cost
   end
 
-  def self.by_kg price
-    Product.new price, :kg
+  def self.by_kg price, cost=nil
+    Product.new price, :kg, cost
   end
 
   def price_for quantity
@@ -37,19 +38,11 @@ class ProductWithQuantity
   def total
     return @product.price_for(@quantity) if @product.offer.nil?
 
-    self.total_with_offer
+    @product.offer.total_for @quantity
   end
 
-  protected
-  def total_with_offer
-    qty = @quantity
-    price = 0
-    until qty < @product.offer.quantity
-      price += @product.offer.price
-      qty -= @product.offer.quantity
-    end
-
-    price + @product.price_for(qty)
+  def cost
+    @product.cost * @quantity
   end
 
 end
@@ -74,11 +67,42 @@ end
 
 class Offer
 
-  attr_reader :quantity, :price
+  def initialize quantity: , price:, product:
+    @group_quantity = quantity
+    @group_price = price
+    @product = product
+  end
 
-  def initialize quantity: , price:
-    @quantity = quantity
-    @price = price
+  def total_for quantity
+    qty = quantity
+    price = 0
+    until qty < @group_quantity
+      price += @group_price
+      qty -= @group_quantity
+    end
+
+    price + @product.price_for(qty)
+  end
+
+end
+
+
+class Stock
+
+  def initialize
+    @products = []
+  end
+
+  def << product
+    @products << product
+  end
+
+  def total_selling_price
+    @products.reduce(0) { |sum, product| product.total + sum  }
+  end
+
+  def total_cost
+    @products.reduce(0) { |sum, product| product.cost + sum  }
   end
 
 end
