@@ -26,6 +26,14 @@ class Product
     end
   end
 
+  def cost_for quantity
+    if @unit_type == :kg
+      @cost * quantity / 1000
+    else
+      @cost * quantity
+    end
+  end
+
 end
 
 class ProductWithQuantity
@@ -42,7 +50,7 @@ class ProductWithQuantity
   end
 
   def cost
-    @product.cost * @quantity
+    @product.cost_for @quantity
   end
 
 end
